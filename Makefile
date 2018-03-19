@@ -10,3 +10,6 @@ build: draft-gondwana-imap-uniqueid.txt draft-gondwana-imap-uniqueid.html
 
 %.html: %.xml
 	xml2rfc --html $< $@
+
+clean:
+	rm -f *.txt *.html *.xml
