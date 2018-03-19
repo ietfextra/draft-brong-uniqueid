@@ -108,19 +108,19 @@ S: 3 OK Completed
 C: 4 create bar
 S: 4 OK Completed
 C: 5 status foo (uniqueid uidvalidity)
-S: * STATUS foo (UIDVALIDITY 1521472287 UNIQUEID 7uijf0icjpb2u0bg4yeo51a7)
+S: * STATUS foo (UIDVALIDITY 1521472287 UNIQUEID 7uijf0bg4yeo51a7)
 S: 5 OK Completed
 C: 6 status bar (uniqueid uidvalidity)
-S: * STATUS bar (UIDVALIDITY 1521472288 UNIQUEID u8vhithdtfps40uy16v5k99p)
+S: * STATUS bar (UIDVALIDITY 1521472288 UNIQUEID u8vhi0uy16v5k99p)
 S: 6 OK Completed
 C: 7 rename foo renamed
 S: * OK rename foo renamed
 S: 7 OK Completed
 C: 8 status renamed (uniqueid uidvalidity)
-S: * STATUS renamed (UIDVALIDITY 1521472287 UNIQUEID 7uijf0icjpb2u0bg4yeo51a7)
+S: * STATUS renamed (UIDVALIDITY 1521472287 UNIQUEID 7uijf0bg4yeo51a7)
 S: 8 OK Completed
 C: 9 status bar (uniqueid uidvalidity)
-S: * STATUS bar (UIDVALIDITY 1521472288 UNIQUEID u8vhithdtfps40uy16v5k99p)
+S: * STATUS bar (UIDVALIDITY 1521472288 UNIQUEID u8vhi0uy16v5k99p)
 S: 9 OK Completed
 ```
 
