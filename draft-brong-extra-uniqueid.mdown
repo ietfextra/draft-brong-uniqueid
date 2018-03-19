@@ -208,11 +208,11 @@ S: 26 OK Completed (0.000 sec)
 
 This extension defines two new search keys for the SEARCH command:
 
-MSGID <blob>
+MSGID blob
     Messages with the exactly matching MSGID (bytes, does not
     depend on charset, case IS significant)
 
-THRID <blob>
+THRID blob
     Messages with the exactly matching THRID (bytes, does not
     depend on charset, case IS significant)
 
