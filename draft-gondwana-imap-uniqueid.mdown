@@ -2,7 +2,7 @@
     title = "IMAP Extension for unique identifiers"
     abbrev = "IMAP UniqueID"
     category = "std"
-    docName = "draft-ietf-extra-uniqueid-00"
+    docName = "draft-gondwana-imap-uniqueid-00"
     updates = []
     ipr= "trust200902"
     area = "Applications"
@@ -39,15 +39,15 @@ changed location on the server.
 
 IMAP stores are often used by many clients, which each cache information
 locally about the server state so that they don't need to download anything
-again.  [@RFC3501] defines that a mailbox can be uniquely referenced by
+again.  [@!RFC3501] defines that a mailbox can be uniquely referenced by
 its name and UIDVALIDITY, and a message within that mailbox can be uniquely
 referenced by its mailbox (name + UIDVALIDITY) and UID.
 
-Further, [@RFC4315] defines a COPYUID response which allows a client which
+Further, [@!RFC4315] defines a COPYUID response which allows a client which
 copies messages between folders to know the mapping between the UIDs in the
 source and destination mailboxes, and hence update its local cache.
 
-So a client which copies (or [@RFC6851] moves) messages or renames folders
+So a client which copies (or [@!RFC6851] moves) messages or renames folders
 can update its local cache, but any other client connected to the same store
 can not know with certainty that the messages are identical, and so will
 re-download everything.
@@ -124,7 +124,7 @@ S: * STATUS bar (UIDVALIDITY 1521472288 UNIQUEID u8vhi0uy16v5k99p)
 S: 9 OK Completed
 ```
 
-When the LIST-STATUS IMAP capability [@RFC5819] is also available,
+When the LIST-STATUS IMAP capability [@!RFC5819] is also available,
 the STATUS command can be combined with the LIST command to further
 improve efficiency.  This way, the unique ids of many mailboxes can be
 queried with just one LIST command.
