@@ -1,12 +1,12 @@
 
 
-build: draft-brong-extra-uniqueid.txt draft-brong-extra-uniqueid.html
+build: draft-gondwana-imap-uniqueid.txt draft-gondwana-imap-uniqueid.html
 
-draft-brong-extra-uniqueid.xml: draft-brong-extra-uniqueid.mdown
-	mmark -xml2 -page draft-brong-extra-uniqueid.mdown > draft-brong-extra-uniqueid.xml
+%.xml: %.mdown
+	mmark -xml2 -page $< > $@
 
-draft-brong-extra-uniqueid.txt: draft-brong-extra-uniqueid.xml
-	xml2rfc --text draft-brong-extra-uniqueid.xml draft-brong-extra-uniqueid.txt
+%.txt: %.xml
+	xml2rfc --text $< $@
 
-draft-brong-extra-uniqueid.html: draft-brong-extra-uniqueid.xml
-	xml2rfc --html draft-brong-extra-uniqueid.xml draft-brong-extra-uniqueid.html
+%.html: %.xml
+	xml2rfc --html $< $@
