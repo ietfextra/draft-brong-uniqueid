@@ -35,15 +35,6 @@ changed location on the server.
 
 {mainmatter}
 
-# Changes
-
-## 00 to 01
-
-* renamed UNIQUEID (status item) to MAILBOXID
-* renamed MSGID to EMAILID
-* renamed THRID to THREADID
-* added TODO section
-
 # Introduction
 
 IMAP stores are often used by many clients, which each cache information
@@ -189,9 +180,9 @@ Message-ID: <fake.1521475657.60280@hotmail.com>
 S: 17 OK [APPENDUID 1521475658 3] Completed
 
 C: 22 fetch 1:* (emailid threadid)
-S: * 1 FETCH (EMAILID Md8976d99ac3275bb4e918af4 THREADID T4964b478a75b7ea9)
-S: * 2 FETCH (EMAILID Mdd3c288836c4c7a762b2d2b9 THREADID T4964b478a75b7ea9)
-S: * 3 FETCH (EMAILID Mf2e25fdc09b49ea703b05cef THREADID T6311863d02dd95b5)
+S: * 1 FETCH (EMAILID Md8976d99ac3275bb4e THREADID T4964b478a75b7ea9)
+S: * 2 FETCH (EMAILID Mdd3c288836c4c7a762 THREADID T4964b478a75b7ea9)
+S: * 3 FETCH (EMAILID Mf2e25fdc09b49ea703 THREADID T6311863d02dd95b5)
 S: 22 OK Completed (0.000 sec)
 
 C: 23 move 2 foo
@@ -200,8 +191,8 @@ S: * 2 EXPUNGE
 S: 23 OK Completed
 
 C: 24 fetch 1:* (emailid threadid)
-S: * 1 FETCH (EMAILID Md8976d99ac3275bb4e918af4 THREADID T4964b478a75b7ea9)
-S: * 2 FETCH (EMAILID Mf2e25fdc09b49ea703b05cef THREADID T6311863d02dd95b5)
+S: * 1 FETCH (EMAILID Md8976d99ac3275bb4e THREADID T4964b478a75b7ea9)
+S: * 2 FETCH (EMAILID Mf2e25fdc09b49ea703 THREADID T6311863d02dd95b5)
 S: 24 OK Completed (0.000 sec)
 C: 25 select "foo"
 
@@ -209,7 +200,7 @@ C: 25 select "foo"
 [...]
 S: 25 OK [READ-WRITE] Completed
 C: 26 fetch 1:* (emailid threadid)
-: * 1 FETCH (EMAILID Mdd3c288836c4c7a762b2d2b9 THREADID T4964b478a75b7ea9)
+S: * 1 FETCH (EMAILID Mdd3c288836c4c7a762 THREADID T4964b478a75b7ea9)
 S: 26 OK Completed (0.000 sec)
 ```
 
@@ -302,6 +293,15 @@ retained.
 * add ABNF
 * consider whether IDs should be constrained to a smaller set of allowed
   characters (in conjunction with JMAP group)
+
+# Changes
+
+## 01
+
+* renamed UNIQUEID (status item) to MAILBOXID
+* renamed MSGID to EMAILID
+* renamed THRID to THREADID
+* added TODO section
 
 # Acknowledgments
 
