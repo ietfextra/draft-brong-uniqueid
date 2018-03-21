@@ -2,7 +2,7 @@
     title = "IMAP Extension for unique identifiers"
     abbrev = "IMAP UniqueID"
     category = "std"
-    docName = "draft-gondwana-imap-uniqueid-00"
+    docName = "draft-gondwana-imap-uniqueid-01"
     updates = []
     ipr= "trust200902"
     area = "Applications"
@@ -35,6 +35,15 @@ changed location on the server.
 
 {mainmatter}
 
+# Changes
+
+## 00 to 01
+
+* renamed UNIQUEID (status item) to MAILBOXID
+* renamed MSGID to EMAILID
+* renamed THRID to THREADID
+* added TODO section
+
 # Introduction
 
 IMAP stores are often used by many clients, which each cache information
@@ -52,11 +61,11 @@ can update its local cache, but any other client connected to the same store
 can not know with certainty that the messages are identical, and so will
 re-download everything.
 
-This extension adds new properties to a message (MSGID) and mailbox (UNIQUEID)
+This extension adds new properties to a message (EMAILID) and mailbox (MAILBOXID)
 which allow a client to quickly identify messages or mailboxes which have been
 renamed by another client.
 
-This extension also adds an optional thread identifier (THRID) to messages,
+This extension also adds an optional thread identifier (THREADID) to messages,
 which can be used by the server to indicate messages which it has identified
 to be related.
 
@@ -84,20 +93,20 @@ the response list to the CAPABILITY command.
 This extension defines one new status data item for the STATUS
 command and response:
 
-UNIQUEID
+MAILBOXID
       A unique identifier for the mailbox.  This identifier SHOULD be
       retained when the mailbox is renamed.  This identifer MUST NOT
       be identical if the mailbox does not meet the invarients for a
       mailbox with the same name and uidvalidity as a mailbox
       previously reported to have this UIDVALIDITY.  A server MUST NOT
-      return two mailboxes with the same UNIQUEID.
+      return two mailboxes with the same MAILBOXID.
 
-The value of the UNIQUEID is an opaque string of 1..255 bytes in length.
-The UNIQUEID is server assigned and read-only.
+The value of the MAILBOXID is an opaque string of 1..255 bytes in length.
+The MAILBOXID is server assigned and read-only.
 
-The server MAY choose to create a UNIQUEID value in a way that does not
+The server MAY choose to create a MAILBOXID value in a way that does not
 survive RENAME, (e.g. a digest of mailboxname + uidvalidity could be used
-as a "UNIQUEID" and it would be legal, though of course clients would
+as a "MAILBOXID" and it would be legal, though of course clients would
 not get the full benefits of this extension from such a server).
 
 Example:
@@ -107,20 +116,20 @@ C: 3 create foo
 S: 3 OK Completed
 C: 4 create bar
 S: 4 OK Completed
-C: 5 status foo (uniqueid uidvalidity)
-S: * STATUS foo (UIDVALIDITY 1521472287 UNIQUEID 7uijf0bg4yeo51a7)
+C: 5 status foo (mailboxid uidvalidity)
+S: * STATUS foo (UIDVALIDITY 1521472287 MAILBOXID 7uijf0bg4yeo51a7)
 S: 5 OK Completed
-C: 6 status bar (uniqueid uidvalidity)
-S: * STATUS bar (UIDVALIDITY 1521472288 UNIQUEID u8vhi0uy16v5k99p)
+C: 6 status bar (mailboxid uidvalidity)
+S: * STATUS bar (UIDVALIDITY 1521472288 MAILBOXID u8vhi0uy16v5k99p)
 S: 6 OK Completed
 C: 7 rename foo renamed
 S: * OK rename foo renamed
 S: 7 OK Completed
-C: 8 status renamed (uniqueid uidvalidity)
-S: * STATUS renamed (UIDVALIDITY 1521472287 UNIQUEID 7uijf0bg4yeo51a7)
+C: 8 status renamed (mailboxid uidvalidity)
+S: * STATUS renamed (UIDVALIDITY 1521472287 MAILBOXID 7uijf0bg4yeo51a7)
 S: 8 OK Completed
-C: 9 status bar (uniqueid uidvalidity)
-S: * STATUS bar (UIDVALIDITY 1521472288 UNIQUEID u8vhi0uy16v5k99p)
+C: 9 status bar (mailboxid uidvalidity)
+S: * STATUS bar (UIDVALIDITY 1521472288 MAILBOXID u8vhi0uy16v5k99p)
 S: 9 OK Completed
 ```
 
@@ -133,26 +142,26 @@ queried with just one LIST command.
 
 This extension defines two additional FETCH items on messages:
 
-MSGID
+EMAILID
     A server allocated opaque string value (1..255 bytes) which
     uniquely identifies the content of a single message.  That is
     the exact bytes of the RFC822 FETCH item.  The server MUST NOT
-    return the same MSGID for two different sets of bytes.  The
-    server SHOULD return the same MSGID for the same set of bytes.
+    return the same EMAILID for two different sets of bytes.  The
+    server SHOULD return the same EMAILID for the same set of bytes.
 
     The server SHOULD retain the same INTERNALDATE for messages with
-    the same MSGID.
+    the same EMAILID.
 
-THRID
+THREADID
     A server allocated opaque string value (1..255 bytes) which
     is the same for messages which the server has, with its own
     algorithm, decided are "related" in some way.  This is generally
     based on some combination of References, In-Reply-To and Subject
     but the exact logic is left up to the server implementation.
-    If the mailbox does not support THRID, it will return NIL for
+    If the mailbox does not support THREADID, it will return NIL for
     fetch.
 
-    THRID MUST NOT change if MSGID is the same.
+    THREADID MUST NOT change if EMAILID is the same.
 
 Example:
 
@@ -179,10 +188,10 @@ Message-ID: <fake.1521475657.60280@hotmail.com>
 [...]
 S: 17 OK [APPENDUID 1521475658 3] Completed
 
-C: 22 fetch 1:* (msgid thrid)
-S: * 1 FETCH (MSGID Md8976d99ac3275bb4e918af4 THRID T4964b478a75b7ea9)
-S: * 2 FETCH (MSGID Mdd3c288836c4c7a762b2d2b9 THRID T4964b478a75b7ea9)
-S: * 3 FETCH (MSGID Mf2e25fdc09b49ea703b05cef THRID T6311863d02dd95b5)
+C: 22 fetch 1:* (emailid threadid)
+S: * 1 FETCH (EMAILID Md8976d99ac3275bb4e918af4 THREADID T4964b478a75b7ea9)
+S: * 2 FETCH (EMAILID Mdd3c288836c4c7a762b2d2b9 THREADID T4964b478a75b7ea9)
+S: * 3 FETCH (EMAILID Mf2e25fdc09b49ea703b05cef THREADID T6311863d02dd95b5)
 S: 22 OK Completed (0.000 sec)
 
 C: 23 move 2 foo
@@ -190,17 +199,17 @@ S: * OK [COPYUID 1521475659 2 1] Completed
 S: * 2 EXPUNGE
 S: 23 OK Completed
 
-C: 24 fetch 1:* (msgid thrid)
-S: * 1 FETCH (MSGID Md8976d99ac3275bb4e918af4 THRID T4964b478a75b7ea9)
-S: * 2 FETCH (MSGID Mf2e25fdc09b49ea703b05cef THRID T6311863d02dd95b5)
+C: 24 fetch 1:* (emailid threadid)
+S: * 1 FETCH (EMAILID Md8976d99ac3275bb4e918af4 THREADID T4964b478a75b7ea9)
+S: * 2 FETCH (EMAILID Mf2e25fdc09b49ea703b05cef THREADID T6311863d02dd95b5)
 S: 24 OK Completed (0.000 sec)
 C: 25 select "foo"
 
 C: 25 select "foo"
 [...]
 S: 25 OK [READ-WRITE] Completed
-C: 26 fetch 1:* (msgid thrid)
-: * 1 FETCH (MSGID Mdd3c288836c4c7a762b2d2b9 THRID T4964b478a75b7ea9)
+C: 26 fetch 1:* (emailid threadid)
+: * 1 FETCH (EMAILID Mdd3c288836c4c7a762b2d2b9 THREADID T4964b478a75b7ea9)
 S: 26 OK Completed (0.000 sec)
 ```
 
@@ -208,21 +217,21 @@ S: 26 OK Completed (0.000 sec)
 
 This extension defines two new search keys for the SEARCH command:
 
-MSGID blob
-    Messages with the exactly matching MSGID (bytes, does not
+EMAILID blob
+    Messages with the exactly matching EMAILID (bytes, does not
     depend on charset, case IS significant)
 
-THRID blob
-    Messages with the exactly matching THRID (bytes, does not
+THREADID blob
+    Messages with the exactly matching THREADID (bytes, does not
     depend on charset, case IS significant)
 
 Example: (as if run before the MOVE above when the mailbox had 3 messages)
 
 ```
-C: 27 search msgid Md8976d99ac3275bb4e918af4
+C: 27 search emailid Md8976d99ac3275bb4e918af4
 S: * SEARCH 1
 S: 27 OK Completed (1 msgs in 0.000 secs)
-C: 28 search thrid T4964b478a75b7ea9
+C: 28 search threadid T4964b478a75b7ea9
 S: * SEARCH 1 2
 S: 28 OK Completed (2 msgs in 0.000 secs)
 ```
@@ -232,20 +241,20 @@ S: 28 OK Completed (2 msgs in 0.000 secs)
 
 The case of RENAME INBOX may need special handling for unique ids.
 
-It is OK to change the uniqueid on a folder RENAME, but you MUST NOT
-ever re-use a UNIQUEID which has been shown to a client.
+It is OK to change the mailboxid on a folder RENAME, but you MUST NOT
+ever re-use a MAILBOXID which has been shown to a client.
 
-It is advisable (though not required) to have UNIQUEID be globally
+It is advisable (though not required) to have MAILBOXID be globally
 unique, but they it is only required to be unique within a single
 server.
 
 If you have unique IDs larger than 255 bytes in a data store, it is
 safe to use a cryptograhically strong hash to convert your IDs into
-a UNIQUEID value to display for this extension.  It may be worth
-caching that value, as STATUS UNIQUEID is expected to be cheap for
+a MAILBOXID value to display for this extension.  It may be worth
+caching that value, as STATUS MAILBOXID is expected to be cheap for
 the server to calculate.
 
-Ideas for implementing MSGID:
+Ideas for implementing EMAILID:
 
 * Digest of (MailboxName/UIDVALIDITY/UID) - is not kept when moving
   messages, but is guarantee unique.
@@ -253,9 +262,9 @@ Ideas for implementing MSGID:
 * ID allocated at creation time - very efficient but requires storage
   of an additional value.
 
-Ideas for implementing THRID:
+Ideas for implementing THREADID:
 
-* Derive from MSGID of first seen message in the thread.
+* Derive from EMAILID of first seen message in the thread.
 * ID allocated at creation time.
 
 There is a need to index and look up reference/in-reply-to data
@@ -268,13 +277,13 @@ each folder only.  The server has significant leeway here.
 # Future considerations
 
 This extension is intentionally defined to be compatible with the data
-model in JMAP. (XXX: ref)
+model in [@!I-D.ietf-jmap-mail].
 
 A future extension could be proposed to give a way to SELECT a mailbox
-by uniqueid rather than name.
+by MAILBOXID rather than name.
 
-An extension to allow fetching message content directly via MSGID and
-fetch message listing by THRID could be proposed.
+An extension to allow fetching message content directly via EMAILID and
+message listings by THREADID could be proposed.
 
 # IANA Considerations
 
@@ -283,10 +292,16 @@ registry located at <http://www.iana.org/assignments/imap-capabilities>.
 
 # Security Considerations
 
-If globally unique identifiers are used as UNIQUIDs on IMAP folders, then
-it may be possible to tell when an account or folder has been renamed,
+If globally unique identifiers are used as MAILBOXIDs on IMAP folders,
+then it may be possible to tell when an account or folder has been renamed,
 even if all the mail has been deleted, if the folders themselves are
 retained.
+
+# TODO
+
+* add ABNF
+* consider whether IDs should be constrained to a smaller set of allowed
+  characters (in conjunction with JMAP group)
 
 # Acknowledgments
 
