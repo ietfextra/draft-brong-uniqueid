@@ -293,6 +293,8 @@ retained.
 * add ABNF
 * consider whether IDs should be constrained to a smaller set of allowed
   characters (in conjunction with JMAP group)
+* consider whether STATUS response should be MAILBOXID ("value") to allow
+  non-integer responses.
 
 # Changes
 
