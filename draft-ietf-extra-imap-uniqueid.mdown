@@ -2,7 +2,7 @@
     title = "IMAP Extension for unique identifiers"
     abbrev = "IMAP UniqueID"
     category = "std"
-    docName = "draft-extra-imap-uniqueid-00"
+    docName = "draft-ietf-extra-imap-uniqueid-00"
     updates = []
     ipr= "trust200902"
     area = "Applications"
