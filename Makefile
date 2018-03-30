@@ -1,6 +1,6 @@
 
 
-build: draft-gondwana-imap-uniqueid.txt draft-gondwana-imap-uniqueid.html draft-gondwana-imap-uniqueid.xml
+build: draft-extra-imap-uniqueid.txt draft-extra-imap-uniqueid.html draft-extra-imap-uniqueid.xml
 
 %.xml: %.mdown
 	mmark -xml2 -page $< > $@

@@ -2,14 +2,14 @@
     title = "IMAP Extension for unique identifiers"
     abbrev = "IMAP UniqueID"
     category = "std"
-    docName = "draft-gondwana-imap-uniqueid-01"
+    docName = "draft-gondwana-imap-uniqueid-02"
     updates = []
     ipr= "trust200902"
     area = "Applications"
     workgroup = "EXTRA"
     keyword = ["IMAP", "email"]
 
-    date = 2018-03-19T00:00:00Z
+    date = 2018-03-22T00:00:00Z
 
     [[author]]
     initials="B."
@@ -129,6 +129,19 @@ the STATUS command can be combined with the LIST command to further
 improve efficiency.  This way, the unique ids of many mailboxes can be
 queried with just one LIST command.
 
+Example:
+
+```
+C: 10 list "" "*" return (status (mailboxid))
+S: * LIST (\HasNoChildren) "." INBOX
+S: * STATUS INBOX (MAILBOXID 2l3g6iiw520ruqo1mcspbfv2)
+S: * LIST (\HasNoChildren) "." bar
+S: * STATUS bar (MAILBOXID 0vfkeq1wzgse343kegel6glk)
+S: * LIST (\HasNoChildren) "." renamed
+S: * STATUS renamed (MAILBOXID 4jbgi9zgfnc9gtwu7qmkye45)
+S: 10 OK Completed (0.001 secs 3 calls)
+```
+
 # FETCH Command and Response Extensions
 
 This extension defines two additional FETCH items on messages:
@@ -226,6 +239,23 @@ C: 28 search threadid T4964b478a75b7ea9
 S: * SEARCH 1 2
 S: 28 OK Completed (2 msgs in 0.000 secs)
 ```
+
+# Response Codes
+
+This specification defines {need help here} response codes:
+
+Example:
+
+```
+
+
+```
+
+# Formal syntax
+
+resp-text-code =/ "MAILBOXID" / "EMAILID" / "THREADID"
+
+uniqueid = 1*255(ALPHA / DIGIT / "_" / "-")
 
 
 # Implementation considerations
