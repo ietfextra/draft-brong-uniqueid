@@ -2,14 +2,14 @@
     title = "IMAP Extension for unique identifiers"
     abbrev = "IMAP UniqueID"
     category = "std"
-    docName = "draft-gondwana-imap-uniqueid-02"
+    docName = "draft-extra-imap-uniqueid-00"
     updates = []
     ipr= "trust200902"
     area = "Applications"
     workgroup = "EXTRA"
     keyword = ["IMAP", "email"]
 
-    date = 2018-03-22T00:00:00Z
+    date = 2018-03-30T00:00:00Z
 
     [[author]]
     initials="B."
@@ -242,18 +242,19 @@ S: 28 OK Completed (2 msgs in 0.000 secs)
 
 # Response Codes
 
-This specification defines {need help here} response codes:
+This specification defines a new response code "MAILBOXID" to the "CREATE"
+command.
 
 Example:
 
 ```
-
-
+C: 3 create foo
+S: 3 OK [MAILBOXID 87nn6m5t8azrrrywp4qfxkez] Completed
 ```
 
 # Formal syntax
 
-resp-text-code =/ "MAILBOXID" / "EMAILID" / "THREADID"
+resp-text-code =/ "MAILBOXID"
 
 uniqueid = 1*255(ALPHA / DIGIT / "_" / "-")
 
