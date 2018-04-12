@@ -1,8 +1,8 @@
 %%%
-    title = "IMAP Extension for unique identifiers"
-    abbrev = "IMAP UniqueID"
+    title = "IMAP Extension for object identifiers"
+    abbrev = "IMAP ObjectID"
     category = "std"
-    docName = "draft-ietf-extra-imap-uniqueid-00"
+    docName = "draft-ietf-extra-imap-uniqueid-01"
     updates = []
     ipr= "trust200902"
     area = "Applications"
@@ -73,11 +73,18 @@ described in [@!RFC2119] when they appear in ALL CAPS.  These words may
 also appear in this document in lower case as plain English words,
 absent their normative meanings.
 
-
 # CAPABILITY Identification
 
-IMAP servers that support this extension MUST include "UNIQUEID" in
+IMAP servers that support this extension MUST include "OBJECTID" in
 the response list to the CAPABILITY command.
+
+# Object identifiers
+
+All OBJECTIDs are allocated by the server.  In the interests of reducing
+the possibilities of encoding mistakes, only a subset of characters are
+allows in OBJECTIDs.  In order to allow clients to allocate storage sensibly,
+they are restricted in length, and servers SHOULD also follow defensive
+allocation strategies to avoid confusion.
 
 # STATUS Command and Response Extensions
 
@@ -92,8 +99,14 @@ MAILBOXID
       previously reported to have this UIDVALIDITY.  A server MUST NOT
       return two mailboxes with the same MAILBOXID.
 
-The value of the MAILBOXID is an opaque string of 1..255 bytes in length.
+The value of MAILBOXID is a list of containing exactly one uniquid.
 The MAILBOXID is server assigned and read-only.
+
+MAILBOXID is implemented as a list because [@!RFC4466] requires that status
+values are a tagged-ext-val, which is either tagged-ext-simple
+(which only contains number or sequence-set), or a list of tagged-ext-comp
+(which allows astring).  Since a uniqueid is a subset of astring, this is
+the correct representation.
 
 The server MAY choose to create a MAILBOXID value in a way that does not
 survive RENAME, (e.g. a digest of mailboxname + uidvalidity could be used
@@ -104,23 +117,23 @@ Example:
 
 ```
 C: 3 create foo
-S: 3 OK Completed
+S: 3 OK [MAILBOXID (7uijf0bg4yeo51a7)] Completed
 C: 4 create bar
-S: 4 OK Completed
+S: 4 OK [MAILBOXID (u8vhi0uy16v5k99p)] Completed
 C: 5 status foo (mailboxid uidvalidity)
-S: * STATUS foo (UIDVALIDITY 1521472287 MAILBOXID 7uijf0bg4yeo51a7)
+S: * STATUS foo (UIDVALIDITY 1521472287 MAILBOXID (7uijf0bg4yeo51a7))
 S: 5 OK Completed
 C: 6 status bar (mailboxid uidvalidity)
-S: * STATUS bar (UIDVALIDITY 1521472288 MAILBOXID u8vhi0uy16v5k99p)
+S: * STATUS bar (UIDVALIDITY 1521472288 MAILBOXID (u8vhi0uy16v5k99p))
 S: 6 OK Completed
 C: 7 rename foo renamed
 S: * OK rename foo renamed
 S: 7 OK Completed
 C: 8 status renamed (mailboxid uidvalidity)
-S: * STATUS renamed (UIDVALIDITY 1521472287 MAILBOXID 7uijf0bg4yeo51a7)
+S: * STATUS renamed (UIDVALIDITY 1521472287 MAILBOXID (7uijf0bg4yeo51a7))
 S: 8 OK Completed
 C: 9 status bar (mailboxid uidvalidity)
-S: * STATUS bar (UIDVALIDITY 1521472288 MAILBOXID u8vhi0uy16v5k99p)
+S: * STATUS bar (UIDVALIDITY 1521472288 MAILBOXID (u8vhi0uy16v5k99p))
 S: 9 OK Completed
 ```
 
@@ -134,13 +147,19 @@ Example:
 ```
 C: 10 list "" "*" return (status (mailboxid))
 S: * LIST (\HasNoChildren) "." INBOX
-S: * STATUS INBOX (MAILBOXID 2l3g6iiw520ruqo1mcspbfv2)
+S: * STATUS INBOX (MAILBOXID (2l3g6iiw520ruqo2))
 S: * LIST (\HasNoChildren) "." bar
-S: * STATUS bar (MAILBOXID 0vfkeq1wzgse343kegel6glk)
+S: * STATUS bar (MAILBOXID (u8vhi0uy16v5k99p))
 S: * LIST (\HasNoChildren) "." renamed
-S: * STATUS renamed (MAILBOXID 4jbgi9zgfnc9gtwu7qmkye45)
+S: * STATUS renamed (MAILBOXID (7uijf0bg4yeo51a7))
 S: 10 OK Completed (0.001 secs 3 calls)
 ```
+
+# Addition to UIDPLUS
+
+If the server also support [@!RFC4315] then the OK response to
+CREATE SHOULD include [MAILBOXID (<objectid>)] as the
+response.
 
 # FETCH Command and Response Extensions
 
@@ -256,10 +275,11 @@ S: 3 OK [MAILBOXID 87nn6m5t8azrrrywp4qfxkez] Completed
 
 resp-text-code =/ "MAILBOXID"
 
-uniqueid = 1*255(ALPHA / DIGIT / "_" / "-")
+objectid = 1*255(ALPHA / DIGIT / "_" / "-")
 
 
 # Implementation considerations
+
 
 The case of RENAME INBOX may need special handling for unique ids.
 
@@ -309,32 +329,37 @@ message listings by THREADID could be proposed.
 
 # IANA Considerations
 
-The IANA is requested to add "UNIQUEID" to the "IMAP Capabilities"
+The IANA is requested to add "OBJECTID" to the "IMAP Capabilities"
 registry located at <http://www.iana.org/assignments/imap-capabilities>.
 
 # Security Considerations
 
-If globally unique identifiers are used as MAILBOXIDs on IMAP folders,
-then it may be possible to tell when an account or folder has been renamed,
-even if all the mail has been deleted, if the folders themselves are
-retained.
+It is strongly advised that servers generate OBJECTIDs which are safe to
+use as filesystem names, and unlikely to be auto-detected as numbers.
+It's also advisable not to start or finish with - or _, particularly as
+starting with - can cause glob expansion to be detected as options when
+passed to command line tools.
 
-# TODO
+An easy way to achieve these outcomes is to prefix all IDs with
+an alpha character as in the examples above.
 
-* add ABNF
-* consider whether IDs should be constrained to a smaller set of allowed
-  characters (in conjunction with JMAP group)
-* consider whether STATUS response should be MAILBOXID ("value") to allow
-  non-integer responses.
+Finally, the special value NIL is likely to cause confusion for parsers
+and SHOULD NOT be used as an OBJECTID.  Again, just prefixing with a
+character which is not 'N' will always avoid this!
 
 # Changes
+
+To be removed by the editor before publication
 
 ## 01
 
 * renamed UNIQUEID (status item) to MAILBOXID
 * renamed MSGID to EMAILID
 * renamed THRID to THREADID
-* added TODO section
+* renamed UNIQUEID (capability) to OBJECTID
+* restricted IDs to 64 safe characters
+* added security considerations about choosing IDs
+* wrapped all responses in () for RFC4466 compatibility
 
 # Acknowledgments
 
