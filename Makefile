@@ -1,6 +1,6 @@
 
 
-build: draft-ietf-extra-imap-uniqueid.txt draft-ietf-extra-imap-uniqueid.html draft-ietf-extra-imap-uniqueid.xml
+build: draft-ietf-extra-imap-objectid.txt draft-ietf-extra-imap-objectid.html draft-ietf-extra-imap-objectid.xml
 
 %.xml: %.mdown
 	mmark -xml2 -page $< > $@
