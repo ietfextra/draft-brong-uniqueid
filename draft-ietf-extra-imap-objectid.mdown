@@ -370,8 +370,8 @@ S: 28 OK Completed (2 msgs in 0.000 secs)
 # Formal syntax
 
 The following syntax specification uses the Augmented Backus-Naur
-Form (ABNF) [@!RFC4234] notation.  Elements not defined here can be found
-in the formal syntax of the ABNF [@!RFC4234], IMAP [@!RFC3501], and IMAP
+Form (ABNF) [@!RFC5234] notation.  Elements not defined here can be found
+in the formal syntax of the ABNF [@!RFC5234], IMAP [@!RFC3501], and IMAP
 ABNF extensions [@!RFC4466] specifications.
 
 Except as noted otherwise, all alphabetic characters are case-
@@ -486,7 +486,7 @@ To be removed by the editor before publication
 
 ## draft-ietf-extra-imap-objectid-01
 
-* Added "updates" for RFC3501
+* added "updates" for RFC3501
 * fixed domains in thread example
 * described threading in more detail
 * added IANA request for Response Code
@@ -494,6 +494,7 @@ To be removed by the editor before publication
 * simplified some waffle in wording
 * added security consideration to choose good digest
 * added MAILBOXID-UID suggestion for EMAILID generation
+* updated ABNF normative reference to RFC5234
 
 ## draft-ietf-extra-imap-objectid-00
 
