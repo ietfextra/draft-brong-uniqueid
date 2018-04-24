@@ -2,14 +2,14 @@
     title = "IMAP Extension for object identifiers"
     abbrev = "IMAP ObjectID"
     category = "std"
-    docName = "draft-ietf-extra-imap-objectid-00"
-    updates = []
+    docName = "draft-ietf-extra-imap-objectid-01"
+    updates = [3501]
     ipr= "trust200902"
     area = "Applications"
     workgroup = "EXTRA"
     keyword = ["IMAP", "email"]
 
-    date = 2018-04-20T00:00:00Z
+    date = 2018-04-24T00:00:00Z
 
     [[author]]
     initials="B."
@@ -80,26 +80,26 @@ absent their normative meanings.
 
 # CAPABILITY Identification
 
-IMAP servers that support this extension MUST include "OBJECTID" in
+IMAP servers that support this extension **MUST** include "OBJECTID" in
 the response list to the CAPABILITY command.
 
 # MAILBOXID object identifier
 
 The MAILBOXID is a server-allocated unique identifer for each mailbox.
 
-The server SHOULD return the same MAILBOXID for a server with the same
+The server **SHOULD** return the same MAILBOXID for a server with the same
 mailbox name and UIDVALIDITY.  This is almost MUST, but weakened to allow
 for the possibility of loss of OBJECTID data during disaster recovery
 while still keeping the name and UIDVALIDITY the same.
 
-The server MUST NOT report the same MAILBOXID for two mailboxes at the
+The server **MUST NOT** report the same MAILBOXID for two mailboxes at the
 same time.
 
-The server MUST NOT reuse the same MAILBOXID for a mailbox which does not
+The server **MUST NOT** reuse the same MAILBOXID for a mailbox which does not
 obey all the invarients that [@!RFC3501] defines for a mailbox which does
 not change name or UIDVALIDITY.
 
-The server MAY choose to create a MAILBOXID value in a way that does not
+The server **MAY** choose to create a MAILBOXID value in a way that does not
 survive RENAME (e.g. a digest of name + uidvalidity could be used),
 however the client then loses the major benefit of having an identifier.
 
@@ -107,6 +107,9 @@ however the client then loses the major benefit of having an identifier.
 
 This document extends the CREATE command to have the response code MAILBOXID
 on successful mailbox creation.
+
+A server advertising the OBJECTID capability **MUST** include the MAILBOXID
+response code in the tagged OK response to all successful CREATE commands.
 
 Syntax: "MAILBOXID" SP "(" &lt;objectid&gt; ")"
 
@@ -125,10 +128,12 @@ S: 5 NO Mailbox already exists
 
 ## New OK Untagged Response for SELECT and EXAMINE
 
-This document adds a new untagged response code to any successful
-SELECT or EXAMINE command.  A server advertising OBJECTID capability
-MUST return this untagged response to all successful SELECT and EXAMINE
-commands.
+This document adds a new untagged response code to the SELECT and
+EXAMINE commands.
+
+A server advertising the OBJECTID capability **MUST** return an untagged
+OK response with the MAILBOXID response code on all successful SELECT
+and EXAMINE commands.
 
 Syntax: "OK" SP "[" "MAILBOXID" SP "(" &lt;objectid&gt; ")" "]" text
 
@@ -148,6 +153,9 @@ S: 27 OK [READ-WRITE] Completed
 
 This document adds the MAILBOXID attribute to the STATUS command using
 the extended syntax defined in [@!RFC4466].
+
+A server that advertises the OBJECTID capability **MUST** support the
+MAILBOXID status attribute.
 
 Syntax: "MAILBOXID"
 
@@ -179,10 +187,8 @@ S: * STATUS bar (MAILBOXID (F6352ae03-b7f5-463c-896f-d47cf8b48ee3))
 S: 10 OK Completed
 ```
 
-When the LIST-STATUS IMAP capability [@!RFC5819] is also available,
-the STATUS command can be combined with the LIST command to further
-improve efficiency.  This way, the MAILBOXIDs of many mailboxes can be
-queried with just one LIST command.
+When the LIST-STATUS IMAP capability defined in [@!RFC5819] is also
+available, the STATUS command can be combined with the LIST command.
 
 Example:
 
@@ -199,8 +205,7 @@ S: 11 OK Completed (0.001 secs 3 calls)
 
 # EMAILID object identifier and THREADID correlator
 
-This document adds two additional data items to individual email
-messages within a mailbox, EMAILID and THREADID.
+This document defines the data items EMAILID and THREADID on messages.
 
 ## EMAILID identifier for identical messages
 
@@ -209,45 +214,48 @@ content of a single message.  Anything which must remain
 immutable on a {name, uidvalidity, uid} triple must also be the
 same between messages with the same EMAILID.
 
-The server SHOULD return the same EMAILID for the same UID triple.  As
+The server **SHOULD** return the same EMAILID for the same UID triple.  As
 with MAILBOXID above, this is almost a MUST, but allows for the possibility
 of loss of OBJECTID data in disaster recovery without having to change
 UIDVALIDITY.
 
-The server SHOULD return the same EMAILID for the exact same message
+The server **SHOULD** return the same EMAILID for the exact same message
 content in different folders after a COPY or [@RFC6851] MOVE
 command.
 
-The server MAY us content detection to assign the same EMAILID
-upon APPEND of an identical message.
+The server **MAY** assign the same EMAILID as an existing message upon
+APPEND if it detects that the new message has exactly identical content
+to that existing message.
 
 ## THREADID identifer for related messages
 
 The THREADID data item is an objectid which uniquely identifies
-as set of messages which the server believes are related in some way.
+a set of messages which the server believes should be grouped
+together when presented.
 
 THREADID calculation is generally based on some combination of References,
 In-Reply-To and Subject, but the exact logic is left up to the server
-implementation.
+implementation.  [@RFC5256] describes some algorithms that MAY be used,
+however this specfication does not mandate any particular strategy.
 
-The server MUST return the same THREADID for all messages with the same
-EMAILID.
+The server **MUST** return the same THREADID for all messages with the
+same EMAILID.
 
-The server SHOULD return the same THREADID for related messages even if
-they are in different mailboxes.
+The server **SHOULD** return the same THREADID for related messages even
+if they are in different mailboxes.
 
 THREADID is optional, if the server is unable to calculate relationships
-between messages, it MUST return NIL to in all FETCH responses for the
-THREADID data item, and it MUST NOT match any messages for any value of
-THREADID.
+between messages, it **MUST** return NIL to in all FETCH responses for the
+THREADID data item, and a SEARCH for THREADID **MUST NOT** match any messages.
 
-The server MAY use the same value for both EMAILID and THREADID, for example
-the THREADID could be the EMAILID of the first message seen in each thread.
+The server **MAY** use the same objectid value for both EMAILID and THREADID,
+for example the THREADID could be the EMAILID of the first message that
+the server has seen in each thread.
 
 
 ## New Message Data Items in FETCH and UID FETCH Commands
 
-This document specifies two new FETCH items for messages:
+This document defines two FETCH items:
 
 Syntax: EMAILID
 
@@ -271,7 +279,6 @@ Syntax:  THREADID ( &lt;objectid&gt; )
     The THREADID response data item contains the server-assigned objectid
     for the set of related messages to which this message belongs.
 
-
 Syntax:  THREADID NIL
 
     The NIL value to the THREADID response data item is returned when
@@ -283,29 +290,29 @@ Example:
 C: 5 append inbox "20-Mar-2018 03:07:37 +1100" {733}
 [...]
 Subject: Message A
-Message-ID: <fake.1521475657.54797@hotmail.com>
+Message-ID: <fake.1521475657.54797@example.com>
 [...]
 S: 5 OK [APPENDUID 1521475658 1] Completed
 
 C: 11 append inbox "20-Mar-2018 03:07:37 +1100" {793}
 [...]
 Subject: Re: Message A
-Message-ID: <fake.1521475657.21213@gmail.com>
-References: <fake.1521475657.54797@hotmail.com>
+Message-ID: <fake.1521475657.21213@example.org>
+References: <fake.1521475657.54797@example.com>
 [...]
 S: 11 OK [APPENDUID 1521475658 2] Completed
 
 C: 17 append inbox "20-Mar-2018 03:07:37 +1100" {736}
 [...]
 Subject: Message C
-Message-ID: <fake.1521475657.60280@hotmail.com>
+Message-ID: <fake.1521475657.60280@example.com>
 [...]
 S: 17 OK [APPENDUID 1521475658 3] Completed
 
 C: 22 fetch 1:* (emailid threadid)
-S: * 1 FETCH (EMAILID (Md8976d99ac3275bb4e) THREADID (T4964b478a75b7ea9))
-S: * 2 FETCH (EMAILID (Mdd3c288836c4c7a762) THREADID (T4964b478a75b7ea9))
-S: * 3 FETCH (EMAILID (Mf2e25fdc09b49ea703) THREADID (T6311863d02dd95b5))
+S: * 1 FETCH (EMAILID (M8976d99ac3275bb4e) THREADID (T4964b478a75b7ea9))
+S: * 2 FETCH (EMAILID (Md3c288836c4c7a762) THREADID (T4964b478a75b7ea9))
+S: * 3 FETCH (EMAILID (M2e25fdc09b49ea703) THREADID (T6311863d02dd95b5))
 S: 22 OK Completed (0.000 sec)
 
 C: 23 move 2 foo
@@ -314,8 +321,8 @@ S: * 2 EXPUNGE
 S: 23 OK Completed
 
 C: 24 fetch 1:* (emailid threadid)
-S: * 1 FETCH (EMAILID (Md8976d99ac3275bb4e) THREADID (T4964b478a75b7ea9))
-S: * 2 FETCH (EMAILID (Mf2e25fdc09b49ea703) THREADID (T6311863d02dd95b5))
+S: * 1 FETCH (EMAILID (M8976d99ac3275bb4e) THREADID (T4964b478a75b7ea9))
+S: * 2 FETCH (EMAILID (M2e25fdc09b49ea703) THREADID (T6311863d02dd95b5))
 S: 24 OK Completed (0.000 sec)
 C: 25 select "foo"
 
@@ -323,7 +330,7 @@ C: 25 select "foo"
 [...]
 S: 25 OK [READ-WRITE] Completed
 C: 26 fetch 1:* (emailid threadid)
-S: * 1 FETCH (EMAILID (Mdd3c288836c4c7a762) THREADID (T4964b478a75b7ea9))
+S: * 1 FETCH (EMAILID (Md3c288836c4c7a762) THREADID (T4964b478a75b7ea9))
 S: 26 OK Completed (0.000 sec)
 ```
 
@@ -338,7 +345,7 @@ S: 26 OK Completed (0.000 sec)
 
 # New Filters on SEARCH command
 
-This extension defines the EMAILID and THREADID filters for the SEARCH command.
+This document defines filters EMAILID and THREADID on the SEARCH command.
 
 EMAILID &lt;objectid&gt;
 
@@ -351,7 +358,7 @@ THREADID &lt;objectid&gt;
 Example: (as if run before the MOVE above when the mailbox had 3 messages)
 
 ```
-C: 27 search emailid Md8976d99ac3275bb4e918af4
+C: 27 search emailid M8976d99ac3275bb4e
 S: * SEARCH 1
 S: 27 OK Completed (1 msgs in 0.000 secs)
 C: 28 search threadid T4964b478a75b7ea9
@@ -377,26 +384,27 @@ capability =/ "OBJECTID"
 fetch-att =/ "EMAILID" / "THREADID"
 
 fetch-emailid-resp = "EMAILID" SP "(" objectid ")"
-            ;; follows tagged-ext production from [@!RFC4466]
+        ; follows tagged-ext production from [@!RFC4466]
 
-fetch-threadid-resp = "THREADID" SP "(" objectid ")"
-            ;; follows tagged-ext production from [@!RFC4466]
+fetch-threadid-resp = "THREADID" SP "(" objectid ")" /
+                      "THREADID NIL
+        ; follows tagged-ext production from [@!RFC4466]
 
 objectid = 1*255(ALPHA / DIGIT / "_" / "-")
-            ;; characters in object identifiers are case
-            ;; significant
+        ; characters in object identifiers are case
+        ; significant
 
 resp-text-code =/ "MAILBOXID" SP "(" objectid ")"
-            ;; incorporated before the expansion rule of
-            ;;  atom [SP 1*&lt;any TEXT-CHAR except "]"&gt;]
-            ;; that appears in [@!RFC3501]
+        ; incorporated before the expansion rule of
+        ;  atom [SP 1*&lt;any TEXT-CHAR except "]"&gt;]
+        ; that appears in [@!RFC3501]
 
 search-key =/ "EMAILID" SP objectid / "THREADID" SP objectid
 
 status-att =/ "MAILBOXID"
 
 status-att-value =/ "MAILBOXID" SP "(" objectid ")"
-            ;; follows tagged-ext production from [@!RFC4466]
+        ; follows tagged-ext production from [@!RFC4466]
 
 
 # Implementation considerations
@@ -432,38 +440,11 @@ alphabetical character.
 The case of RENAME INBOX may need special handling for unique ids.
 
 It is advisable (though not required) to have MAILBOXID be globally
-unique, but they it is only required to be unique within a single
-server.
-
-## Ideas for implementing object identifiers
-
-This section contains non-normative suggestions.
-
-Ideas for implementing MAILBOXID:
-
-* Digest of (MailboxName/UIDVALIDITY) - not kept when renaming,
-  but is guaranteed unique and doesn't require storage.
-* [@RFC4122] UUID
-* Server assigned sequence number (guaranteed not to be reused)
-
-Ideas for implementing EMAILID:
-
-* Digest of (MailboxName/UIDVALIDITY/UID) - is not kept when copying
-  messages, but is guaranteed unique and doesn't require storage.
-* Digest of message content (RFC822 bytes) - expensive unless cached
-* [@RFC4122] UUID
-* Server assigned sequence number (guaranteed not to be reused)
-
-Ideas for implementing THREADID:
-
-* Derive from EMAILID of first seen message in the thread.
-* [@RFC4122] UUID
-* Server assigned sequence number (guaranteed not to be reused)
-
-There is a need to index and look up reference/in-reply-to data
-at message creation to efficiently find matching messages
-for threading.  Threading may be either across folders, or within
-each folder only.  The server has significant leeway here.
+unique, but it is only required to be unique within messages offered
+to a single client login to a single server hostname.  For example,
+a proxy which aggregates multiple independent servers **MUST NOT**
+advertise the OBJECTID capability unless it can guarantee that
+the backends will not use the same identifiers for different objects.
 
 
 # Future considerations
@@ -479,14 +460,22 @@ message listings by THREADID could be proposed.
 
 # IANA Considerations
 
-The IANA is requested to add "OBJECTID" to the "IMAP Capabilities"
+IANA is requested to add "OBJECTID" to the "IMAP Capabilities"
 registry located at <http://www.iana.org/assignments/imap-capabilities>.
+
+IANA is requested to add "MAILBOXID" to the "IMAP Response Codes"
+registry located at <https://www.iana.org/assignments/imap-response-codes>
+with a Reference of [THIS RFC].
 
 # Security Considerations
 
 It is strongly advised that servers generate OBJECTIDs which are safe to
 use as filesystem names, and unlikely to be auto-detected as numbers.  See
 implementation considerations.
+
+If a digest is used for ID generation, it must have a collision resistent
+property, so server implementations are advised to monitor current security
+research and choose secure digests.
 
 The use of a digest for ID generation may be used as proof that a particular
 sequence of bytes was seen by the server.
@@ -495,21 +484,82 @@ sequence of bytes was seen by the server.
 
 To be removed by the editor before publication
 
-## 01
+## draft-ietf-extra-imap-objectid-01
 
-* renamed UNIQUEID (capability) to OBJECTID (and renamed the draft as well)
-* renamed UNIQUEID (status item) to MAILBOXID
-* renamed MSGID to EMAILID
-* renamed THRID to THREADID
+* Added "updates" for RFC3501
+* fixed domains in thread example
+* described threading in more detail
+* added IANA request for Response Code
+* clarified RFC2119 references
+* simplified some waffle in wording
+* added security consideration to choose good digest
+* added MAILBOXID-UID suggestion for EMAILID generation
+
+## draft-ietf-extra-imap-objectid-00
+
+* renamed draft to be objectid rather than uniqueid
+* renamed UNIQUEID (capability) to OBJECTID
 * restricted objectid to 64 safe characters
 * added security considerations and advice about choosing objectid
 * wrapped all responses in () for RFC4466 compatibility
 * signifiant rewrite of all sections
 
+## draft-ietf-extra-imap-uniqueid-00
+
+* renamed draft to be an EXTRA document
+* added example for LIST RETURN STATUS
+* started work on ABNF
+* attempted to add response codes for EMAILID and THREADID
+
+## draft-gondwana-imap-uniqueid-01
+
+* renamed UNIQUEID (status item) to MAILBOXID
+* renamed MSGID to EMAILID
+* renamed THRID to THREADID
+* added TODO section
+
+## draft-gondwana-imap-uniqueid-00
+
+* initial upload with names UNIQUEID/MSGID/THRID
+
 # Acknowledgments
 
-The EXTRA working group at IETF.
+The EXTRA working group at IETF.  In particular feedback from
+Arnt Gulbrandsen, Brandon Long, Chris Newman and Josef Sipek.
 
-The gmail team's X-GM-THRID and X-GM-MSGID implementation.
+The Gmail X-GM-THRID and X-GM-MSGID implementation as currently defined
+at <https://developers.google.com/gmail/imap/imap-extensions>.
+
+Dovecot X-GUID implementation.
+
+## Appendix 1: ideas for implementing object identifiers
+
+Ideas for implementing MAILBOXID:
+
+* Digest of (MailboxName/UIDVALIDITY) - not kept when renaming,
+  but is guaranteed unique and doesn't require storage.
+* [@RFC4122] UUID
+* Server assigned sequence number (guaranteed not to be reused)
+
+Ideas for implementing EMAILID:
+
+* Digest of (MailboxName/UIDVALIDITY/UID) - is not kept when copying
+  messages, but is guaranteed unique and doesn't require storage.
+* Concatenation of MAILBOXID-UID - for servers which store MAILBOXID
+  but not EMAILID.
+* Digest of message content (RFC822 bytes) - expensive unless cached
+* [@RFC4122] UUID
+* Server assigned sequence number (guaranteed not to be reused)
+
+Ideas for implementing THREADID:
+
+* Derive from EMAILID of first seen message in the thread.
+* [@RFC4122] UUID
+* Server assigned sequence number (guaranteed not to be reused)
+
+There is a need to index and look up reference/in-reply-to data
+at message creation to efficiently find matching messages
+for threading.  Threading may be either across folders, or within
+each folder only.  The server has significant leeway here.
 
 {backmatter}
