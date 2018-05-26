@@ -2,14 +2,14 @@
     title = "IMAP Extension for object identifiers"
     abbrev = "IMAP ObjectID"
     category = "std"
-    docName = "draft-ietf-extra-imap-objectid-01"
+    docName = "draft-ietf-extra-imap-objectid-02"
     updates = [3501]
     ipr= "trust200902"
     area = "Applications"
     workgroup = "EXTRA"
     keyword = ["IMAP", "email"]
 
-    date = 2018-04-24T00:00:00Z
+    date = 2018-05-26T00:00:00Z
 
     [[author]]
     initials="B."
@@ -501,6 +501,10 @@ sequence of bytes was seen by the server.
 # Changes
 
 To be removed by the editor before publication
+
+## draft-ietf-extra-imap-objectid-02
+
+* added "Client usage" section
 
 ## draft-ietf-extra-imap-objectid-01
 
