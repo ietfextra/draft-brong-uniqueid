@@ -446,6 +446,24 @@ a proxy which aggregates multiple independent servers **MUST NOT**
 advertise the OBJECTID capability unless it can guarantee that
 the backends will not use the same identifiers for different objects.
 
+## Client usage
+
+Servers that implement both RFC 6154 and this specification SHOULD
+optimize their execution of command like UID SEARCH OR EMAILID 1234 EMAILID
+4321.
+
+Clients can assume that searching the all-mail mailbox using
+OR/EMAILID or OR/THREADID is a fast way to find messages again if some
+other client has moved them out of the mailbox where they were previously
+seen.
+
+Clients that cache data offline SHOULD fetch the EMAILID of all new
+messages to avoid re-downloading already cached message details.
+
+Clients SHOULD fetch the MAILBOXID for any new mailboxes before
+discarding cache data for any mailbox which is no longer present
+on the server, so that they can detect renames and avoid re-downloading
+data.
 
 # Future considerations
 
