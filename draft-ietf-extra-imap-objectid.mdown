@@ -507,6 +507,7 @@ To be removed by the editor before publication
 * added RFC3501 to Abstract
 * updated [[THIS RFC]] to not fail idnits
 * changed jmap-mail to be informative rather than normative
+* shortened IDs to stop wrapping and outdents in IMAP examples
 
 ## draft-ietf-extra-imap-objectid-02
 
