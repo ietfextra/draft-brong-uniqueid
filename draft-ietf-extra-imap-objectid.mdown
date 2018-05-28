@@ -143,7 +143,6 @@ Example:
 ```
 C: 27 select "foo"
 [...]
-S: * OK [UIDVALIDITY 1524195797] Ok
 S: * OK [MAILBOXID (F2212ea87-6097-4256-9d51-71338625)] Ok
 [...]
 S: 27 OK [READ-WRITE] Completed
