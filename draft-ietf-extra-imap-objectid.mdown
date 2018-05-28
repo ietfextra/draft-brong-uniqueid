@@ -29,9 +29,9 @@
 
 .# Abstract
 
-This document adds new properties to [@!RFC3501] IMAP mailboxes and messages
-to allow clients to more efficiently re-use cached data for resources which
-have changed location on the server.
+This document updates RFC3501 (IMAP4rev1) with persistent identifiers on
+mailboxes and messages to allow clients to more efficiently re-use cached
+data when resources have changed location on the server.
 
 {mainmatter}
 
@@ -119,9 +119,9 @@ Example:
 
 ```
 C: 3 create foo
-S: 3 OK [MAILBOXID (F2212ea87-6097-4256-9d51-716686338625)] Completed
+S: 3 OK [MAILBOXID (F2212ea87-6097-4256-9d51-71338625)] Completed
 C: 4 create bar
-S: 4 OK [MAILBOXID (F6352ae03-b7f5-463c-896f-d47cf8b48ee3)] Completed
+S: 4 OK [MAILBOXID (F6352ae03-b7f5-463c-896f-d8b48ee3)] Completed
 C: 5 create foo
 S: 5 NO Mailbox already exists
 ```
@@ -144,7 +144,7 @@ Example:
 C: 27 select "foo"
 [...]
 S: * OK [UIDVALIDITY 1524195797] Ok
-S: * OK [MAILBOXID (F2212ea87-6097-4256-9d51-716686338625)] Ok
+S: * OK [MAILBOXID (F2212ea87-6097-4256-9d51-71338625)] Ok
 [...]
 S: 27 OK [READ-WRITE] Completed
 ```
@@ -171,19 +171,19 @@ Example:
 
 ```
 C: 6 status foo (mailboxid)
-S: * STATUS foo (MAILBOXID (F2212ea87-6097-4256-9d51-716686338625))
+S: * STATUS foo (MAILBOXID (F2212ea87-6097-4256-9d51-71338625))
 S: 6 OK Completed
 C: 7 status bar (mailboxid)
-S: * STATUS bar (MAILBOXID (F6352ae03-b7f5-463c-896f-d47cf8b48ee3))
+S: * STATUS bar (MAILBOXID (F6352ae03-b7f5-463c-896f-d8b48ee3))
 S: 7 OK Completed
 C: 8 rename foo renamed
 S: * OK rename foo renamed
 S: 8 OK Completed
 C: 9 status renamed (mailboxid)
-S: * STATUS renamed (MAILBOXID (F2212ea87-6097-4256-9d51-716686338625))
+S: * STATUS renamed (MAILBOXID (F2212ea87-6097-4256-9d51-71338625))
 S: 9 OK Completed
 C: 10 status bar (mailboxid)
-S: * STATUS bar (MAILBOXID (F6352ae03-b7f5-463c-896f-d47cf8b48ee3))
+S: * STATUS bar (MAILBOXID (F6352ae03-b7f5-463c-896f-d8b48ee3))
 S: 10 OK Completed
 ```
 
@@ -197,9 +197,9 @@ C: 11 list "" "*" return (status (mailboxid))
 S: * LIST (\HasNoChildren) "." INBOX
 S: * STATUS INBOX (MAILBOXID (Ff8e3ead4-9389-4aff-adb1-d8d89efd8cbf))
 S: * LIST (\HasNoChildren) "." bar
-S: * STATUS bar (MAILBOXID (F6352ae03-b7f5-463c-896f-d47cf8b48ee3))
+S: * STATUS bar (MAILBOXID (F6352ae03-b7f5-463c-896f-d8b48ee3))
 S: * LIST (\HasNoChildren) "." renamed
-S: * STATUS renamed (MAILBOXID (F2212ea87-6097-4256-9d51-716686338625))
+S: * STATUS renamed (MAILBOXID (F2212ea87-6097-4256-9d51-71338625))
 S: 11 OK Completed (0.001 secs 3 calls)
 ```
 
@@ -310,9 +310,9 @@ Message-ID: <fake.1521475657.60280@example.com>
 S: 17 OK [APPENDUID 1521475658 3] Completed
 
 C: 22 fetch 1:* (emailid threadid)
-S: * 1 FETCH (EMAILID (M8976d99ac3275bb4e) THREADID (T4964b478a75b7ea9))
-S: * 2 FETCH (EMAILID (Md3c288836c4c7a762) THREADID (T4964b478a75b7ea9))
-S: * 3 FETCH (EMAILID (M2e25fdc09b49ea703) THREADID (T6311863d02dd95b5))
+S: * 1 FETCH (EMAILID (M6d99ac3275bb4e) THREADID (T64b478a75b7ea9))
+S: * 2 FETCH (EMAILID (M288836c4c7a762) THREADID (T64b478a75b7ea9))
+S: * 3 FETCH (EMAILID (M5fdc09b49ea703) THREADID (T11863d02dd95b5))
 S: 22 OK Completed (0.000 sec)
 
 C: 23 move 2 foo
@@ -321,8 +321,8 @@ S: * 2 EXPUNGE
 S: 23 OK Completed
 
 C: 24 fetch 1:* (emailid threadid)
-S: * 1 FETCH (EMAILID (M8976d99ac3275bb4e) THREADID (T4964b478a75b7ea9))
-S: * 2 FETCH (EMAILID (M2e25fdc09b49ea703) THREADID (T6311863d02dd95b5))
+S: * 1 FETCH (EMAILID (M6d99ac3275bb4e) THREADID (T64b478a75b7ea9))
+S: * 2 FETCH (EMAILID (M5fdc09b49ea703) THREADID (T11863d02dd95b5))
 S: 24 OK Completed (0.000 sec)
 C: 25 select "foo"
 
@@ -330,7 +330,7 @@ C: 25 select "foo"
 [...]
 S: 25 OK [READ-WRITE] Completed
 C: 26 fetch 1:* (emailid threadid)
-S: * 1 FETCH (EMAILID (Md3c288836c4c7a762) THREADID (T4964b478a75b7ea9))
+S: * 1 FETCH (EMAILID (M288836c4c7a762) THREADID (T64b478a75b7ea9))
 S: 26 OK Completed (0.000 sec)
 ```
 
@@ -358,10 +358,10 @@ THREADID &lt;objectid&gt;
 Example: (as if run before the MOVE above when the mailbox had 3 messages)
 
 ```
-C: 27 search emailid M8976d99ac3275bb4e
+C: 27 search emailid M6d99ac3275bb4e
 S: * SEARCH 1
 S: 27 OK Completed (1 msgs in 0.000 secs)
-C: 28 search threadid T4964b478a75b7ea9
+C: 28 search threadid T64b478a75b7ea9
 S: * SEARCH 1 2
 S: 28 OK Completed (2 msgs in 0.000 secs)
 ```
@@ -483,7 +483,7 @@ registry located at <http://www.iana.org/assignments/imap-capabilities>.
 
 IANA is requested to add "MAILBOXID" to the "IMAP Response Codes"
 registry located at <https://www.iana.org/assignments/imap-response-codes>
-with a Reference of [@I-D.ietf-extra-imap-objectid].
+with a Reference of [[THIS RFC]].
 
 # Security Considerations
 
@@ -501,6 +501,12 @@ sequence of bytes was seen by the server.
 # Changes
 
 To be removed by the editor before publication
+
+## draft-ietf-extra-imap-objectid-03
+
+* added RFC3501 to Abstract
+* updated [[THIS RFC]] to not fail idnits
+* changed jmap-mail to be informative rather than normative
 
 ## draft-ietf-extra-imap-objectid-02
 
