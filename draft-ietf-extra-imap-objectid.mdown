@@ -2,14 +2,14 @@
     title = "IMAP Extension for object identifiers"
     abbrev = "IMAP ObjectID"
     category = "std"
-    docName = "draft-ietf-extra-imap-objectid-02"
+    docName = "draft-ietf-extra-imap-objectid-03"
     updates = [3501]
     ipr= "trust200902"
     area = "Applications"
     workgroup = "EXTRA"
     keyword = ["IMAP", "email"]
 
-    date = 2018-05-26T00:00:00Z
+    date = 2018-05-28T00:00:00Z
 
     [[author]]
     initials="B."
@@ -29,9 +29,9 @@
 
 .# Abstract
 
-This document adds new properties to IMAP mailboxes and messages to allow
-clients to more efficiently re-use cached data for resources which have
-changed location on the server.
+This document adds new properties to [@!RFC3501] IMAP mailboxes and messages
+to allow clients to more efficiently re-use cached data for resources which
+have changed location on the server.
 
 {mainmatter}
 
@@ -468,7 +468,7 @@ data.
 # Future considerations
 
 This extension is intentionally defined to be compatible with the data
-model in [@!I-D.ietf-jmap-mail].
+model in [@I-D.ietf-jmap-mail].
 
 A future extension could be proposed to give a way to SELECT a mailbox
 by MAILBOXID rather than name.
@@ -483,7 +483,7 @@ registry located at <http://www.iana.org/assignments/imap-capabilities>.
 
 IANA is requested to add "MAILBOXID" to the "IMAP Response Codes"
 registry located at <https://www.iana.org/assignments/imap-response-codes>
-with a Reference of [THIS RFC].
+with a Reference of [@I-D.ietf-extra-imap-objectid].
 
 # Security Considerations
 
