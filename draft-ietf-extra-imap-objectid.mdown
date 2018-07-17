@@ -523,6 +523,7 @@ To be removed by the editor before publication
 * referenced RFC3501 for INBOX rename (ad review)
 * referenced RFC3501 security considerations (secdir review)
 * turned mealy-mouthed "SHOULDs" in to "MUSTs" on immutability (genart review)
+* remove suggested algorithms which are no longer legitimate (genart review)
 * updated proxy advice to suggest rewriting ids (genart review)
 * fixed minor gramatical issues (genart review)
 * required that EMAILID and THREADID are not identical (own decision)
@@ -589,19 +590,13 @@ Dovecot X-GUID implementation.
 
 ## Appendix 1: ideas for implementing object identifiers
 
-Ideas for implementing MAILBOXID:
+Ideas for calculating MAILBOXID:
 
-* Digest of (MailboxName/UIDVALIDITY) - not kept when renaming,
-  but is guaranteed unique and doesn't require storage.
 * [@RFC4122] UUID
 * Server assigned sequence number (guaranteed not to be reused)
 
 Ideas for implementing EMAILID:
 
-* Digest of (MailboxName/UIDVALIDITY/UID) - is not kept when copying
-  messages, but is guaranteed unique and doesn't require storage.
-* Concatenation of MAILBOXID-UID - for servers which store MAILBOXID
-  but not EMAILID.
 * Digest of message content (RFC822 bytes) - expensive unless cached
 * [@RFC4122] UUID
 * Server assigned sequence number (guaranteed not to be reused)
