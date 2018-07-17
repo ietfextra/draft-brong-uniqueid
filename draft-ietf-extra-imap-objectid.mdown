@@ -9,7 +9,7 @@
     workgroup = "EXTRA"
     keyword = ["IMAP", "email"]
 
-    date = 2018-07-05T00:00:00Z
+    date = 2018-07-17T00:00:00Z
 
     [[author]]
     initials="B."
@@ -48,9 +48,9 @@ mailbox name, UIDVALIDITY and UID is guaranteed to be immutable.
 copies messages to know the mapping between the UIDs in the
 source and destination mailboxes, and hence update its local cache.
 
-If a mailbox is successfully renamed, the client knows that the same messages
-exist in the destination mailbox name as previously existed in the
-source mailbox name.
+If a mailbox is successfully renamed by a client, that client will know
+that the same messages exist in the destination mailbox name as previously
+existed in the source mailbox name.
 
 The result is that the client which copies (or [@!RFC6851] moves) messages or
 renames a mailbox can update its local cache, but any other client connected
@@ -88,10 +88,8 @@ the response list to the CAPABILITY command.
 
 The MAILBOXID is a server-allocated unique identifer for each mailbox.
 
-The server **SHOULD** return the same MAILBOXID for a mailbox with the same
-name and UIDVALIDITY.  This is almost MUST, but weakened to allow
-for the possibility of loss of OBJECTID data during disaster recovery
-while still keeping the name and UIDVALIDITY the same.
+The server **MUST** return the same MAILBOXID for a mailbox with the same
+name and UIDVALIDITY.
 
 The server **MUST NOT** report the same MAILBOXID for two mailboxes at the
 same time.
@@ -100,9 +98,8 @@ The server **MUST NOT** reuse the same MAILBOXID for a mailbox which does not
 obey all the invarients that [@!RFC3501] defines for a mailbox which does
 not change name or UIDVALIDITY.
 
-The server **MAY** choose to create a MAILBOXID value in a way that does not
-survive RENAME (e.g. a digest of name + uidvalidity could be used),
-however the client then loses the major benefit of having an identifier.
+The server **SHOULD NOT** change MAILBOXID when renaming a folder, as this
+loses the main benefit of having a unique identifier.
 
 ## New response code for CREATE
 
@@ -205,8 +202,6 @@ S: 11 OK Completed (0.001 secs 3 calls)
 
 # EMAILID object identifier and THREADID correlator
 
-This document defines the data items EMAILID and THREADID on messages.
-
 ## EMAILID identifier for identical messages
 
 The EMAILID data item is an objectid which uniquely identifies the
@@ -214,18 +209,21 @@ content of a single message.  Anything which must remain
 immutable on a {name, uidvalidity, uid} triple must also be the
 same between messages with the same EMAILID.
 
-The server **SHOULD** return the same EMAILID for the same UID triple.
-This is almost a **MUST**, but allows for the possibility
-of loss of OBJECTID data in disaster recovery without having to change
-UIDVALIDITY.
+The server **MUST** return the same EMAILID for the same triple,
+hence EMAILID is immutable.
 
-The server **SHOULD** return the same EMAILID for the exact same message
-content in different folders after a COPY or [@RFC6851] MOVE
-command.
+The server **MUST** return the same EMAILID as the source message for
+the matching destination message in the COPYUID pairing after a COPY
+or [@RFC6851] MOVE command.
 
 The server **MAY** assign the same EMAILID as an existing message upon
-APPEND if it detects that the new message has exactly identical content
-to that existing message.
+APPEND (e.g. if it detects that the new message has exactly identical
+content to that of an existing message)
+
+NOTE: EMAILID only identifies the immutable content of the message.  In
+particular, it is possible for different messages with the same EMAILID
+to have different keywords.  This document does not specify a way to
+STORE by EMAILID.
 
 ## THREADID identifer for related messages
 
@@ -246,13 +244,13 @@ if they are in different mailboxes.
 
 THREADID is optional, if the server doesn't support THREADID or
 is unable to calculate relationships between messages, it **MUST** return
-NIL to in all FETCH responses for the THREADID data item, and a SEARCH for
+NIL to all FETCH responses for the THREADID data item, and a SEARCH for
 THREADID **MUST NOT** match any messages.
 
-The server **MAY** use the same objectid value for both EMAILID and THREADID,
-for example the THREADID could be the EMAILID of the first message that
-the server has seen in each thread.
-
+The server **MUST NOT** use the same objectid value for both EMAILIDs
+and THREADIDs.  If they are stored with the same value internally, the
+server can generate prefixed values (as shown in the examples below
+with M and T prefixes) to avoid clashes.
 
 ## New Message Data Items in FETCH and UID FETCH Commands
 
@@ -438,14 +436,16 @@ alphabetical character.
 
 ## Interaction with special cases
 
-The case of RENAME INBOX may need special handling for unique ids.
+The case of RENAME INBOX may need special handling, as it has special
+behaviour as defined in [@!RFC3501] section 6.3.5.
 
 It is advisable (though not required) to have MAILBOXID be globally
 unique, but it is only required to be unique within messages offered
 to a single client login to a single server hostname.  For example,
 a proxy which aggregates multiple independent servers **MUST NOT**
 advertise the OBJECTID capability unless it can guarantee that
-the backends will not use the same identifiers for different objects.
+different objects will never use the same identifiers, even if
+backend object collide.
 
 ## Client usage
 
@@ -474,6 +474,9 @@ model in [@I-D.ietf-jmap-mail].
 A future extension could be proposed to give a way to SELECT a mailbox
 by MAILBOXID rather than name.
 
+A future extension to [@!RFC5228] could allow fileinto by MAILBOXID
+rather than name.
+
 An extension to allow fetching message content directly via EMAILID and
 message listings by THREADID could be proposed.
 
@@ -495,7 +498,7 @@ implementation considerations.
 If a digest is used for ID generation, it must have a collision resistent
 property, so server implementations are advised to monitor current security
 research and choose secure digests.  As the IDs are generated by the server,
-it should be possible to migrate to a new hash by just creating new IDs with
+it will be possible to migrate to a new hash by just creating new IDs with
 the new algorithm.  This is particularly true if a prefix is used on each ID,
 which can be changed when the algorithm changes.
 
@@ -505,9 +508,24 @@ are leaked to clients who don't have permission to fetch the data directly.
 Servers that are expected to handle highly sensitive data should consider
 using a ID generation mechanism which doesn't derive from a digest.
 
+See also the security considerations in [@!RFC3501] section 11.
+
 # Changes
 
 To be removed by the editor before publication
+
+## draft-ietf-extra-imap-objectid-04
+
+* described NIL THREADID in more detail (ad review)
+* made RFC5256 a normative reference (ad review)
+* fixed ABNF missing quote (ad review)
+* documented hash upgrade process (ad review)
+* referenced RFC3501 for INBOX rename (ad review)
+* referenced RFC3501 security considerations (secdir review)
+* turned mealy-mouthed "SHOULDs" in to "MUSTs" on immutability (genart review)
+* updated proxy advice to suggest rewriting ids (genart review)
+* fixed minor gramatical issues (genart review)
+* required that EMAILID and THREADID are not identical (own decision)
 
 ## draft-ietf-extra-imap-objectid-03
 
