@@ -2,14 +2,14 @@
     title = "IMAP Extension for object identifiers"
     abbrev = "IMAP ObjectID"
     category = "std"
-    docName = "draft-ietf-extra-imap-objectid-04"
+    docName = "draft-ietf-extra-imap-objectid-05"
     updates = [3501]
     ipr= "trust200902"
     area = "Applications"
     workgroup = "EXTRA"
     keyword = ["IMAP", "email"]
 
-    date = 2018-07-17T00:00:00Z
+    date = 2018-07-17T18:00:00Z
 
     [[author]]
     initials="B."
@@ -242,6 +242,8 @@ same EMAILID.
 The server **SHOULD** return the same THREADID for related messages even
 if they are in different mailboxes.
 
+The server **MUST NOT** change the THREADID of a message once reported.
+
 THREADID is optional, if the server doesn't support THREADID or
 is unable to calculate relationships between messages, it **MUST** return
 NIL to all FETCH responses for the THREADID data item, and a SEARCH for
@@ -420,7 +422,7 @@ An objectid is a string of 1 to 255 characters from the following set of
 64 codepoints. a-z, A-Z, 0-9, '_', '-'.  These characters are safe to use
 in almost any context (e.g. filesystems, URIs, IMAP atoms).
 
-For maximum safety, servers SHOULD also follow defensive allocation strategies
+For maximum safety, servers should also follow defensive allocation strategies
 to avoid creating risks where glob completion or data type detection may be
 present (e.g. on filesystems or in spreadsheets).  In particular it is wise to
 avoid:
@@ -449,7 +451,7 @@ backend object collide.
 
 ## Client usage
 
-Servers that implement both RFC 6154 and this specification SHOULD
+Servers that implement both RFC 6154 and this specification should
 optimize their execution of command like UID SEARCH OR EMAILID 1234 EMAILID
 4321.
 
@@ -458,10 +460,10 @@ OR/EMAILID or OR/THREADID is a fast way to find messages again if some
 other client has moved them out of the mailbox where they were previously
 seen.
 
-Clients that cache data offline SHOULD fetch the EMAILID of all new
+Clients that cache data offline should fetch the EMAILID of all new
 messages to avoid re-downloading already cached message details.
 
-Clients SHOULD fetch the MAILBOXID for any new mailboxes before
+Clients should fetch the MAILBOXID for any new mailboxes before
 discarding cache data for any mailbox which is no longer present
 on the server, so that they can detect renames and avoid re-downloading
 data.
@@ -513,6 +515,11 @@ See also the security considerations in [@!RFC3501] section 11.
 # Changes
 
 To be removed by the editor before publication
+
+## draft-ietf-extra-imap-objectid-05
+
+* changed some SHOULD to lower case in advice sections (genart review)
+* clarified that THREADID **MUST NOT** change
 
 ## draft-ietf-extra-imap-objectid-04
 
