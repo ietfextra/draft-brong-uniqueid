@@ -233,7 +233,7 @@ together when presented.
 
 THREADID calculation is generally based on some combination of References,
 In-Reply-To and Subject, but the exact logic is left up to the server
-implementation.  [@!RFC5256] describes some algorithms that MAY be used,
+implementation.  [@!RFC5256] describes some algorithms that could be used,
 however this specfication does not mandate any particular strategy.
 
 The server **MUST** return the same THREADID for all messages with the
