@@ -2,14 +2,14 @@
     title = "IMAP Extension for object identifiers"
     abbrev = "IMAP ObjectID"
     category = "std"
-    docName = "draft-ietf-extra-imap-objectid-05"
+    docName = "draft-ietf-extra-imap-objectid-06"
     updates = [3501]
     ipr= "trust200902"
     area = "Applications"
     workgroup = "EXTRA"
     keyword = ["IMAP", "email"]
 
-    date = 2018-07-17T18:00:00Z
+    date = 2018-07-19T10:00:00Z
 
     [[author]]
     initials="B."
@@ -98,8 +98,10 @@ The server **MUST NOT** reuse the same MAILBOXID for a mailbox which does not
 obey all the invarients that [@!RFC3501] defines for a mailbox which does
 not change name or UIDVALIDITY.
 
-The server **SHOULD NOT** change MAILBOXID when renaming a folder, as this
-loses the main benefit of having a unique identifier.
+The server **MUST** keep the same MAILBOXID for the source and destination
+when renaming a mailbox in a way which keeps the same messages (but see
+[@!RFC3501] for the special case regarding renaming of INBOX, which is
+treated as creating a new mailbox and moving the messages)
 
 ## New response code for CREATE
 
@@ -387,9 +389,10 @@ fetch-att =/ "EMAILID" / "THREADID"
 fetch-emailid-resp = "EMAILID" SP "(" objectid ")"
         ; follows tagged-ext production from [@!RFC4466]
 
-fetch-threadid-resp = "THREADID" SP "(" objectid ")" /
-                      "THREADID" NIL
+fetch-threadid-resp = "THREADID" SP ( "(" objectid ")" / nil )
         ; follows tagged-ext production from [@!RFC4466]
+
+msg-att-static =/ fetch-emailid-resp / fetch-threadid-resp
 
 objectid = 1*255(ALPHA / DIGIT / "_" / "-")
         ; characters in object identifiers are case
@@ -515,6 +518,13 @@ See also the security considerations in [@!RFC3501] section 11.
 # Changes
 
 To be removed by the editor before publication
+
+## draft-ietf-extra-imap-objectid-06
+
+* fixed one more missing space in ABNF (ad review)
+* made one more **MUST** for mailbox being retained on rename (genart review)
+* updated ABNF to also extend msg-att-static (validator review)
+* lowercased NIL => nil in ABNF (validator review)
 
 ## draft-ietf-extra-imap-objectid-05
 
