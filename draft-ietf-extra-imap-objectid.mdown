@@ -2,14 +2,14 @@
     title = "IMAP Extension for object identifiers"
     abbrev = "IMAP ObjectID"
     category = "std"
-    docName = "draft-ietf-extra-imap-objectid-07"
+    docName = "draft-ietf-extra-imap-objectid-08"
     updates = [3501]
     ipr= "trust200902"
     area = "Applications"
     workgroup = "EXTRA"
     keyword = ["IMAP", "email"]
 
-    date = 2018-07-31T10:00:00Z
+    date = 2018-08-02T10:00:00Z
 
     [[author]]
     initials="B."
@@ -110,7 +110,7 @@ on successful mailbox creation.
 A server advertising the OBJECTID capability **MUST** include the MAILBOXID
 response code in the tagged OK response to all successful CREATE commands.
 
-Syntax: "MAILBOXID" SP "(" &lt;objectid&gt; ")"
+Syntax: "MAILBOXID" SP "(" objectid ")"
 
     Response code in tagged OK for successful CREATE command.
 
@@ -134,7 +134,7 @@ A server advertising the OBJECTID capability **MUST** return an untagged
 OK response with the MAILBOXID response code on all successful SELECT
 and EXAMINE commands.
 
-Syntax: "OK" SP "[" "MAILBOXID" SP "(" &lt;objectid&gt; ")" "]" text
+Syntax: "OK" SP "[" "MAILBOXID" SP "(" objectid ")" "]" SP text
 
     Untagged OK response to SELECT or EXAMINE.
 
@@ -159,7 +159,7 @@ Syntax: "MAILBOXID"
 
     The attribute in the STATUS command.
 
-Syntax: "MAILBOXID" SP "(" &lt;objectid&gt; ")"
+Syntax: "MAILBOXID" SP "(" objectid ")"
 
     The response item in the STATUS response contains the objectid
     assigned by the server for this mailbox.
@@ -241,11 +241,13 @@ The server **MUST** return the same THREADID for all messages with the
 same EMAILID.
 
 The server **SHOULD** return the same THREADID for related messages even
-if they are in different mailboxes.
+if they are in different mailboxes, e.g. messages which would appear in
+the same thread if they were in the same mailbox **SHOULD** have the same
+THREADID even if they are in different mailboxes.
 
 The server **MUST NOT** change the THREADID of a message once reported.
 
-THREADID is optional, if the server doesn't support THREADID or
+THREADID is **OPTIONAL**; if the server doesn't support THREADID or
 is unable to calculate relationships between messages, it **MUST** return
 NIL to all FETCH responses for the THREADID data item, and a SEARCH for
 THREADID **MUST NOT** match any messages.
@@ -259,29 +261,29 @@ with M and T prefixes) to avoid clashes.
 
 This document defines two FETCH items:
 
-Syntax: EMAILID
+Syntax: "EMAILID"
 
     The EMAILID message data item causes the server to return EMAILID
     FETCH response data items.
 
-Syntax: THREADID
+Syntax: "THREADID"
 
     The THREADID message data item causes the server to return THREADID
     FETCH response data items.
 
 And the following responses:
 
-Syntax:  EMAILID ( &lt;objectid&gt; )
+Syntax: "EMAILID" SP "(" objectid ")"
 
     The EMAILID response data item contains the server-assigned objectid
     for each message.
 
-Syntax:  THREADID ( &lt;objectid&gt; )
+Syntax: "THREADID" SP "(" objectid ")"
 
     The THREADID response data item contains the server-assigned objectid
     for the set of related messages to which this message belongs.
 
-Syntax:  THREADID NIL
+Syntax: "THREADID" SP nil
 
     The NIL value to the THREADID response data item is returned when
     the server mailbox does not support THREADID calculation.
@@ -349,11 +351,11 @@ S: 26 OK Completed (0.000 sec)
 
 This document defines filters EMAILID and THREADID on the SEARCH command.
 
-EMAILID &lt;objectid&gt;
+Syntax: "EMAILID" SP objectid
 
     Messages whose EMAILID is exactly the specified objectid.
 
-THREADID &lt;objectid&gt;
+Syntax: "THREADID" SP objectid
 
     Messages whose THREADID is exactly the specified objectid.
 
@@ -381,6 +383,8 @@ insensitive.  The use of upper- or lowercase characters to define
 token strings is for editorial clarity only.  Implementations MUST
 accept these strings in a case-insensitive fashion.
 
+Please note specifically that objectid values are case sensitive.
+
 ```
 capability =/ "OBJECTID"
 
@@ -400,7 +404,7 @@ objectid = 1*255(ALPHA / DIGIT / "_" / "-")
 
 resp-text-code =/ "MAILBOXID" SP "(" objectid ")"
         ; incorporated before the expansion rule of
-        ;  atom [SP 1*&lt;any TEXT-CHAR except "]"&gt;]
+        ;  atom [SP 1*<any TEXT-CHAR except "]">]
         ; that appears in [@!RFC3501]
 
 search-key =/ "EMAILID" SP objectid / "THREADID" SP objectid
@@ -423,8 +427,9 @@ are restricted to a safe subset of possible byte values, and in order to allow
 clients to allocate storage, they are restricted in length.
 
 An objectid is a string of 1 to 255 characters from the following set of
-64 codepoints. a-z, A-Z, 0-9, '_', '-'.  These characters are safe to use
-in almost any context (e.g. filesystems, URIs, IMAP atoms).
+64 codepoints: a-z, A-Z, 0-9, '_', '-'.  These characters are safe to use
+in almost any context (e.g. filesystems, URIs, IMAP atoms).  These are the
+same characters defined as base64url in [@RFC4648].
 
 For maximum safety, servers should also follow defensive allocation strategies
 to avoid creating risks where glob completion or data type detection may be
@@ -435,7 +440,7 @@ avoid:
 * ids starting with digits
 * ids which contain only digits
 * ids which differ only by ASCII case (A vs a)
-* the specific sequence of 3 characters NIL
+* the specific sequence of 3 characters NIL in any case (as this sequence can be confused with the IMAP protocol expression of the null value)
 
 A good solution to these issues is to prefix every ID with a single
 alphabetical character.
@@ -451,7 +456,7 @@ to a single client login to a single server hostname.  For example,
 a proxy which aggregates multiple independent servers **MUST NOT**
 advertise the OBJECTID capability unless it can guarantee that
 different objects will never use the same identifiers, even if
-backend object collide.
+backend object identifiers collide.
 
 ## Client usage
 
@@ -513,13 +518,24 @@ The use of a digest for ID generation may be used as proof that a particular
 sequence of bytes was seen by the server, however this is only a risk if IDs
 are leaked to clients who don't have permission to fetch the data directly.
 Servers that are expected to handle highly sensitive data should consider
-using a ID generation mechanism which doesn't derive from a digest.
+this when choosing how to create IDs.
 
 See also the security considerations in [@!RFC3501] section 11.
 
 # Changes
 
 To be removed by the editor before publication
+
+## draft-ietf-extra-imap-objectid-08
+
+* added reference to RFC4648 for base64url (Adam Roach review)
+* less prescriptive instruction for digests (Adam Roach review)
+* minor punctuation fix (Alissa Cooper review)
+* clarified SHOULD around THREADID in different mailboxes (Alissa Cooper review)
+* clarified that objectids are case sensitive (Eric Rescorla review)
+* clarified why NIL is a bad objectid (Eric Rescorla review)
+* upper case OPTIONAL for threadid (Pete Resnick genart review)
+* missing word in object identifiers clash (Pete Resnick genart review)
 
 ## draft-ietf-extra-imap-objectid-07
 
